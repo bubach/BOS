@@ -1,0 +1,26 @@
+#######################################
+#                                     #
+#      BOCHS config file for BOS      #
+#                                     #
+#######################################
+
+romimage: file=BIOS-bochs-latest, address=0xf0000
+megs: 32
+vgaromimage: VGABIOS-elpin-2.40
+floppya: 1_44=a:, status=inserted
+boot: a
+floppy_bootsig_check: disabled=0
+log: bochsout.txt
+panic: action=ask
+error: action=report
+info: action=report
+debug: action=ignore
+debugger_log: debugger.out
+vga_update_interval: 300000
+keyboard_serial_delay: 250
+keyboard_paste_delay: 100000
+floppy_command_delay: 50000
+ips: 1000000
+mouse: enabled=0
+keyboard_mapping: enabled=0, map=
+user_shortcut: keys=ctrlaltdel

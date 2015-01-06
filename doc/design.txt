@@ -1,0 +1,226 @@
+BOS design
+----------
+
+The kernel will load internal system modules like STDIO,
+VFS and so on, by calling a dd list in "init.inc".
+STDIO should be the first to load, as to be able to print
+loading status of other parts.
+
+
+
+STDIO will use internal buffer/debug console as STDOUT at
+first, until textmode, VESA or serial output driver is
+activated, at which point the internal buffer/debug console
+will be flushed to new STDOUT.
+
+Module for STDOUT could even include a file handle for
+systems with no normal output device, so that debugging
+information can be read out from file. All drivers
+for STDIO will have to follow a common STDIO interface
+and can be dynamically loaded and unloaded at runtime.
+
+Keyboard/mouse drivers for PS/2 and later USB also needs
+to register itself to STDIO as STDIN devices in the system.
+
+
+
+Other primary services tightly connected to the BOS kernel
+is the VFS for all storage devices and filesystems, the
+interrupt and system call interface for adding new calls
+and groups of calls within the standard int 0x32 interrupt.
+
+Groups of calls is for primary system services to be
+accessed from within the same interrupt, 0x32. For
+example the VFS, could use AL = 0x05 for it's "group-ID"
+and AH = 0x?? for a specific function-call. STDIO, could
+have AL = 0x01 with AH = 0x?? for the function number.
+
+
+
+Another primary systemcall group will be the "loader",
+for applications and modules/drivers not present inside
+the kernel image file - kernel.sys
+
+It will initially support 2 types of applications,
+normal programs and drivers/modules/TSR.
+
+Loading will be handled by means of segmentation at first,
+as the simpler format with less overhead. Similar to
+DOS .COM files. Another format for relocatable programs
+is planned but will require modifications to fasm for
+native output.  This will be similar to .EXE files in
+DOS. No limitations will be made to the formats,
+except the segmentated one will not have base set to zero
+in RAM, and will not have program headers and relocation-
+tables as overhead.
+
+This makes it somewhat trickier to preform certain RAM
+operations in higher level languages but also ideal for
+space constrained applications, such as scene demos - which
+often has very low size limits.
+
+File format exstensions is not yet decided, but might
+differ for the two formats. Maybe .APP for the simpler
+segmentated format and .PRG for the relocatable?
+
+
+
+The kernel image file will need to include some loadable
+drivers at the end for further access to media such as
+the floppy disk, and the FAT12 filesystem. With this it's
+possible that the file on a fat12 formatted floppy will
+be named kernel.img while internally it might be visible
+as kernel.sys, floppy.drv, fat12.drv and so on.
+
+Initially the VFS will have internal drivers for parsing
+this image format and deploying it as a RAM-drive with
+SBFS - static BOS filesystem. A very simple read-only FS
+in linked-list style. As simple as it gets.
+
+So the VFS needs RAM-drive and SBFS support built-in for
+it to be able to load additional drivers for floppy, fat12,
+harddrives and other media. System drive will always
+be this RAM-drive. Any drivers loaded at a later stage can
+be on any other media or drive, such as the floppy.
+
+There should be commands to load a driver like "LOAD"
+for one time use and "LOADPERM" for it to be permanetly
+inserted into the kernel image file for loading at boot.
+"UNLOAD" and "UNLOADPERM" could be used for unloading
+and removing drivers from the kernel image.
+
+
+
+Memory managment and allocation in BOS will be another
+primary system service with it's own group-ID in AL,
+for access with int 0x32. It will provide one allocation
+and freeing service for memory above 1mb and another
+service for memory below 1mb.
+
+Memory below 1mb should only be used in applications that
+needs to run 16-bit code or allocate DMA buffer space. It
+will be possible to demand 64kb align on allocations made
+in low memory - to properly support DMA transfers.
+
+The memory managment service group will also have functions
+to get RAM size, and maybe system location/size or others.
+
+
+
+Running custom 16-bit code will be possible by allocating
+low memory space, relocating any 16-bit code to that area
+and then calling a BOS system service to start execution
+in realmode at that address. This will allow for greater
+flexibility in utilizing BIOS services than a direct
+bridge call to for example interrupt 0x10 or 0x13.
+
+All (segment) registers can be used and BIOS interrupts
+demanding buffer space pointers will easily be supported by
+pre-allocating the necessary low memory before executing
+the real mode code.
+
+Direct execution of a native 16-bit executable file format
+is not planned, but could be supported by a third party
+loader written in 32-bit to take 16-bit binary filename as
+input, allocate low memory for it, relocate it, execute
+and clean up at exit.  Such a program could be extended to
+contain interrupt 0x21 services for basic DOS compability.
+
+BOS kernel is loaded at the 64kb mark right now, but should
+be moved sufficently below that for internal 16-bit code
+to work without address fixes. The ORG offset should be
+below 0xFFFF for all internal 16-bit code. Now it starts
+at 0x10000, which means this offset has to be substracted
+from all 16-bit code that deals with variables.
+
+For external 16-bit code, relocated and runned by the kernel,
+this is no issue.
+
+
+
+BOS should include a scripting language, similar to DOS batch
+files for scripting and "autoexec" usage. If the extension
+is .RUN - the file to autostart drivers and customize the
+system at boot could be called "auto.run".
+
+The scripting language needs some internal commands not tied
+to any shell, for program control - and also for the auto.run
+file to be able to load the shell at boot, the LOADSH command
+is needed. This could be directly tied to the VFS for
+selecting which shell to load.  The shell needs to set some
+system vars like %SHELLNAME% and %SHELLVERSION% for the
+scripts to know what other commands are available from it.
+
+Basic commands, independent of shell could be:
+LOADSH = "fd0:/path/shell.app"
+GOTO LABEL
+:LABEL
+REM comment
+IF [NOT] %xxx%==something GOTO LABEL
+ECHO %1 is first command line parameter
+ECHO.
+ECHO %SHELLNAME% is env. var for shell used.
+SET ENV_VARIBEL=Hi
+SETLOCAL LOCAL_VAR=Bye
+LOOP %var%
+ENDLOOP
+CALL filename.run
+
+Nothing is set in stone, but DOS batch file similarity could
+be good for those that know it well. It should be as easy to
+parse as possible.
+
+
+
+Graphics in BOS will probably be tied to the STDIO services
+with many additional function calls for drawing shapes and
+outputing sprites. Text output will be possible as in any
+textmode, but the cursor will be hidden by default, and if
+enabled, simulated with blinking and all - by BOS.
+
+With text output options even in VESA modes, a system crash
+will still be able to print out some facts about it with
+the same STDOUT functions as in textmode. Font&size will be
+optional, but optimized for best look and usability as default.
+
+Other graphics function will include anything that helps
+and eases the development of games, added as I port and
+develops my own game clones.
+
+
+
+The sound service group will have a unified function interface
+no matter what device is installed, only PC speaker, AC'97,
+SoundBlaster/AdLib compatible or Intel HD audio.
+
+It will be possible for the programs to detect capability of
+the installed driver for best utilization.
+
+
+
+A driver will be loaded in the exact same way as any other
+application but will install itself with the service group
+it belongs to, or as a new interrupt itself before quitting
+in a TSR way.
+
+The interrupt handling code will have functionality for drivers
+not only to install a completly new interrupt, but also to add
+itself as a new service group in the system interrupt 0x32.
+It will then be given a free service number (AL=0x??) for calls
+made to that group.  It could also request to take over an
+existing service number. What internal function to be called is
+decided with the value in AH and could go to external drivers
+that has been loaded and added itself to the service group.
+
+A driver might use .DRV extension or something to distinguish
+itself from a normal executable. It's not decided how to tell
+if it's a .APP type segmented driver or .PRG relocatable driver
+with just one .DRV extension. Could probe for relocatble format
+header for .PRG and assume .APP format if not found. This could
+be done for programs as well, if I choose to use one extension
+on both executable formats.
+
+
+
+The End
+ - for now.
