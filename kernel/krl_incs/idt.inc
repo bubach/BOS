@@ -1,15 +1,15 @@
 ;----------------------------------------------------------;
-; BOS kernel                Christoffer Bubach, 2003-2005. ;
+; BOS kernel		    Christoffer Bubach, 2003-2005. ;
 ;----------------------------------------------------------;
-;                                                          ;
-;       set/modify IDT entries                             ;
-;                                                          ;
+;							   ;
+;	set/modify IDT entries				   ;
+;							   ;
 ;----------------------------------------------------------;
 
 
 
 ;--------------------------------------------------;
-;     set up IDT                                   ;
+;     set up IDT				   ;
 ; in:  edi = pointer to "unhandled int"-function.  ;
 ;--------------------------------------------------;
 init_idt:
@@ -40,9 +40,9 @@ init_idt:
 
 
 ;--------------------------------------;
-;  modify IDT, set any int             ;
-;     in: cl  = int number             ;
-;         edi = int function pointer   ;
+;  modify IDT, set any int	       ;
+;     in: cl  = int number	       ;
+;	  edi = int function pointer   ;
 ;--------------------------------------;
 set_int:
 	  push	  eax
@@ -51,7 +51,8 @@ set_int:
 	  mov	  al, 8 			      ; 8 bytes for each int
 	  mul	  cl				      ; cl * al = ax
 	  movzx   ecx, ax			      ; ecx = offset in IDT (1/2 for dword list)
-	  mov	  [(idt_list+ecx/2)], edi	      ; add new int to idt entry list
+	  ;;mov	  [(idt_list+ecx/2)], edi	      ; add new int to idt entry list
+	  mov	  dword [(idt_list+ecx)], edi	      ; add new int to idt entry list
 
 	  mov	  eax, edi
 	  mov	  [(0x6c00+ecx)], ax
@@ -71,9 +72,9 @@ set_int:
 
 
 ;------------------------------------------------;
-;   get int address                              ;
-;      in:  cl  = int number                     ;
-;      out: esi = address or 0 if none present   ;
+;   get int address				 ;
+;      in:  cl	= int number			 ;
+;      out: esi = address or 0 if none present	 ;
 ;------------------------------------------------;
 get_int:
 	  push	  eax
@@ -90,8 +91,8 @@ get_int:
 
 
 ;----------------------------------------;
-;   sets ints from list                  ;
-;      in:  esi = pointer to int list    ;
+;   sets ints from list 		 ;
+;      in:  esi = pointer to int list	 ;
 ;----------------------------------------;
 set_idt_list:
 	  push	  eax
@@ -117,7 +118,7 @@ set_idt_list:
 
 ;------------------------------;
 ;   list of idt entries.       ;
-;           0 = not handled    ;
+;	    0 = not handled    ;
 ;------------------------------;
 idt_list:	     dd   isr00
 		     dd   isr01

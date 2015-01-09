@@ -11,7 +11,7 @@
 ;---------------------;
 do_all_16bit:
 	  call	  getmem			      ; realmode/mem.inc
-	  mov	  [ram_amount - 0x10000], eax
+	  mov	  [ram_amount], eax
 
 	  xor	  eax, eax			      ; clear mem for IDT and GDT
 	  mov	  edi, 0x6c00			      ; IDT address
@@ -20,15 +20,15 @@ do_all_16bit:
 
 	  mov	  eax, cs
 	  shl	  eax, 4
-	  mov	  [gdt.BOS_16code - 0x10000 + 2], ax  ; Prepare GDT by
-	  mov	  [gdt.BOS_16data - 0x10000 + 2], ax  ; setting 16-bit base.
+	  mov	  [gdt.BOS_16code + 2], ax  ; Prepare GDT by
+	  mov	  [gdt.BOS_16data + 2], ax  ; setting 16-bit base.
 	  shr	  eax, 16
-	  mov	  [gdt.BOS_16code - 0x10000 + 4], al
-	  mov	  [gdt.BOS_16data - 0x10000 + 4], al
-	  mov	  [gdt.BOS_16code - 0x10000 + 7], ah
-	  mov	  [gdt.BOS_16data - 0x10000 + 7], ah
+	  mov	  [gdt.BOS_16code + 4], al
+	  mov	  [gdt.BOS_16data + 4], al
+	  mov	  [gdt.BOS_16code + 7], ah
+	  mov	  [gdt.BOS_16data + 7], ah
 
-	  lea	  esi, [gdt - 0x10000]
+	  lea	  esi, [gdt]
 	  mov	  edi, 0x7400			      ; GDT address
 	  mov	  ecx, (gdt_end - gdt)/4
 	  rep	  movsd 			      ; Move it to final pos.

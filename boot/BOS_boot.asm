@@ -24,30 +24,33 @@
 ;  0x0000:0x6c00 -> 0x0000:0x7400  IDT, 256 descriptors
 ;  0x0000:0x7400 -> 0x0000:0x7c00  GDT, 256 descriptors
 ;  0x0000:0x7c00 -> 0x0000:0x7e00  bootsector
-;  0x0000:0x7e00 <- 0x0000:0xffff  ~32,5kb stack for boot
-;  0x1000:0x0000 -> 0x9000:0xffff  576kb kernel/free space
-;  0xa000:0x0000 -> .............  VGA mem etc.
+;  0x0000:0x7e00 <- 0x0000:0x8000  512b stack for boot
+;  0x0000:0x8000 -> 0x9000:0xffff  608kb kernel/free space
+;;;;  0x0000:0x7e00 <- 0x0000:0xffff  ~32,5kb stack for boot
+;;;;  0x1000:0x0000 -> 0x9000:0xffff  576kb kernel/free space
+;  0xA000:0x0000 -> .............  VGA mem etc.
 
 use16
 org 0x7C00
 
-boot:	  jmp	  near start
+boot:
+	  jmp	  short start
 	  nop
 
 ;------------------------------------------;
 ;  Standard BIOS Parameter Block, "BPB".   ;
 ;------------------------------------------;
-	  bpbOEM	  db  'BOS 0.04'
+      bpbOEM          db  'BOS 0.04'
 	  bpbSectSize	  dw  512
 	  bpbClustSize	  db  1
 	  bpbReservedSec  dw  1
-	  bpbFats	  db  2
+	  bpbFats	      db  2
 	  bpbRootSize	  dw  224
 	  bpbTotalSect	  dw  2880
-	  bpbMedia	  db  240
+	  bpbMedia	      db  240
 	  bpbFatSize	  dw  9
 	  bpbTrackSect	  dw  18
-	  bpbHeads	  dw  2
+	  bpbHeads	      dw  2
 	  bpbHiddenSect   dd  0
 	  bpbLargeSect	  dd  0
      ;---------------------------------;
@@ -56,7 +59,7 @@ boot:	  jmp	  near start
 	  bpbDriveNo	  db  0
 	  bpbReserved	  db  0
 	  bpbSignature	  db  41		      ; 0 = nothing more. 41 = three more (below)..
-	  bpbID 	  dd  1
+	  bpbID 	      dd  1
 	  bpbVolumeLabel  db  'BOOT FLOPPY'
 	  bpbFileSystem   db  'FAT12   '
 
@@ -71,7 +74,7 @@ start:
 	  mov	  ds, ax			      ; registers.
 	  mov	  es, ax
 	  mov	  ss, ax
-	  mov	  sp, 0xFFFF			      ; Stack..
+	  mov	  sp, 0x8000			      ; Stack..
 
 	  mov	  [bpbDriveNo], dl
 
@@ -227,7 +230,7 @@ start:
 ;-----------------------------------;
 found:
 	  mov	  bp, [bx+26]			      ; bp=cluster number from directory entry
-	  mov	  di, 0x1000			      ; 1000 (segment)
+	  mov	  di, 0x800			      ; 1000 (segment)
 
      .next_block:
 	  xor	  cx, cx
@@ -272,7 +275,7 @@ found:
 ;  the file is loaded   ;
 ;-----------------------;
 quit:
-	  jmp	  0x1000:0x0000 		      ; jump to loaded file (64kb in mem)
+	  jmp	  0x0000:0x8000 		      ; jump to loaded file (64kb in mem)
 
 
 ;-------------------------------------;

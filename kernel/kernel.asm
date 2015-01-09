@@ -1,24 +1,24 @@
 ;-------------------------------------------------------;
-;                     BOS kernel                        ;
+;		      BOS kernel			;
 ;-------------------------------------------------------;
-;    BOS 32-bit kernel, expects to be loaded at 64kb    ;
-;    in mem.   Small amount of 16-bit code included.    ;
-;                                                       ;
-;      For any comments on this code, mail me.          ;
-;   http://bos.asmhackers.net/   asmhacker@gmail.com    ;
-;                                                       ;
-;             by: Christoffer Bubach, 2003-2005         ;
+;    BOS 32-bit kernel, expects to be loaded at 64kb	;
+;    in mem.   Small amount of 16-bit code included.	;
+;							;
+;      For any comments on this code, mail me.		;
+;   http://bos.asmhackers.net/	 asmhacker@gmail.com	;
+;							;
+;	      by: Christoffer Bubach, 2003-2005 	;
 ;-------------------------------------------------------;
 use16
-org 0x10000
+org 0x8000
 
 ;---------------------------;
 ;  jump to starting point   ;
 ;---------------------------;
-	  jmp	  start
+	  jmp 	  start
 
 ;----------------------------------------;
-;     16-bit include files               ;
+;     16-bit include files		 ;
 ;----------------------------------------;
 	  include  'realmode/a20.inc'		      ; Function to set the a20-gate.
 	  include  'realmode/gdt.inc'		      ; Global Description Table.
@@ -30,7 +30,7 @@ org 0x10000
 
 
 ;--------------------------;
-;   16-bit entry point     ;
+;   16-bit entry point	   ;
 ;--------------------------;
 start:
 	  cli
@@ -48,10 +48,10 @@ start:
 
 	  cli
 	  mov	  ax, cs			      ; save cs
-	  mov	  [realmode_cs - 0x10000], ax	      ; in variables.inc
+	  mov	  [realmode_cs], ax	      ; in variables.inc
 
-	  lgdt	  [gdtr - 0x10000]		      ; Load the GDT descriptor
-	  lidt	  [idtr - 0x10000]		      ; Load the IDT descriptor
+	  lgdt	  [gdtr]		      ; Load the GDT descriptor
+	  lidt	  [idtr]		      ; Load the IDT descriptor
 
 	  mov	  eax, cr0
 	  or	  al, 1
@@ -62,7 +62,7 @@ start:
 
 
 ;--------------------------;
-;   32-bit entry point     ;
+;   32-bit entry point	   ;
 ;--------------------------;
 use32
 flush:
@@ -84,7 +84,7 @@ flush:
 	  call	  init_cmd
 	  jmp	  shell
 
-	  ;int     0x32
+	  ;int	   0x32
 
      .hang:
 	  cli
@@ -93,7 +93,7 @@ flush:
 
 
 ;----------------------------------------;
-;     32-bit include files               ;
+;     32-bit include files		 ;
 ;----------------------------------------;
 	  include  'krl_incs/idt.inc'		      ; The Interrupt Description Table.
 	  include  'krl_incs/text.inc'		      ; The default textmode functions.
@@ -112,7 +112,7 @@ flush:
 	  include  'krl_incs/time_date.inc'	      ; Print time and date.
 	  include  'krl_incs/timer.inc' 	      ; Timer IRQ.
 	  include  'krl_incs/vga.inc'		      ; VGA functions.
-	;  include  'krl_incs/font8x16.inc'            ; Standard font.
+	;  include  'krl_incs/font8x16.inc'	       ; Standard font.
 	  include  'krl_incs/dma.inc'		      ; DMA code.
 	  include  'krl_incs/fdc.inc'		      ; Floppy code.
 	  include  'krl_incs/mario.inc' 	      ; Mario sprite.
