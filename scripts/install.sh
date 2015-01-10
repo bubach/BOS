@@ -23,8 +23,8 @@ if [ -z "$1" ]; then
 fi
 
 echo -e "\E[32mCompiling BOS...\E[0m"
-./utils/fasm kernel/kernel.asm kernel/kernel.sys
-./utils/fasm boot/BOS_boot.asm boot/BOS_boot.bin
+../utils/fasm ../kernel/kernel.asm ../kernel/kernel.sys
+../utils/fasm ../boot/BOS_boot.asm ../boot/BOS_boot.bin
 
 if [ "$1" = "floppy" ]; then
     echo -e "\E[32mStarting floppy installation...\E[0m"
@@ -34,7 +34,7 @@ if [ "$1" = "floppy" ]; then
     mount /mnt/floppy
 
     #Insert kernel.sys into image
-    cp kernel/kernel.sys /mnt/floppy
+    cp ../kernel/kernel.sys /mnt/floppy
 
     #Umount & cleanup
     umount /mnt/floppy
@@ -45,24 +45,24 @@ else
     echo -e "\E[32mStarting image creation...\E[0m"
 
     #Create empty image
-    if [ -e bos.img ]; then
-        rm -f bos.img
+    if [ -e ../bos.img ]; then
+        rm -f ../bos.img
     fi
     dd if=/dev/zero of=bos.img bs=1k count=1440
 
     #Format image in MSDOS format and mount it
-    mkdosfs bos.img
-    losetup /dev/loop3 bos.img
+    mkdosfs ../bos.img
+    losetup /dev/loop3 ../bos.img
 
     #Install BOS_boot.bin as bootsector into bos.img
-    dd if=boot/BOS_boot.bin of=/dev/loop3 bs=1 count=512
+    dd if=../boot/BOS_boot.bin of=/dev/loop3 bs=1 count=512
     if [ ! -e tmpmnt ]; then
         mkdir tmpmnt
     fi
     mount -tmsdos /dev/loop3 tmpmnt
 
     #Insert kernel.sys into image
-    cp kernel/kernel.sys tmpmnt
+    cp ../kernel/kernel.sys tmpmnt
 
     #Umount & cleanup
     umount /dev/loop3

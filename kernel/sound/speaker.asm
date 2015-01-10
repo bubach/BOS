@@ -2,7 +2,7 @@
 ; BOS kernel                Christoffer Bubach, 2004-2005. ;
 ;----------------------------------------------------------;
 ;                                                          ;
-;     Internal speaker functions...                        ;
+;     Internal PCspeaker functions.                        ;
 ;                                                          ;
 ;----------------------------------------------------------;
 

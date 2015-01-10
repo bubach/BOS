@@ -2,7 +2,7 @@
 echo Put an empty floppy in drive a: and
 pause
 echo.
-cd kernel
+cd ..\kernel
 ..\utils\fasm kernel.asm kernel.sys
 cd ..\boot
 ..\utils\fasm BOS_boot.asm BOS_boot.bin
