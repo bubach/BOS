@@ -7,7 +7,7 @@
 #display_library: term
 romimage: file=/usr/local/Cellar/bochs/2.6.2/share/bochs/BIOS-bochs-latest
 megs: 32
-vgaromimage: file=/usr/local/Cellar/bochs/2.6.2/share/bochs/VGABIOS-elpin-2.40
+vgaromimage: file=/usr/local/Cellar/bochs/2.6.2/share/bochs/VGABIOS-lgpl-latest
 floppya: 1_44=../bos.img, status=inserted
 boot: a
 floppy_bootsig_check: disabled=0

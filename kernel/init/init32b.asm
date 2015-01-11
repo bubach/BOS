@@ -62,7 +62,7 @@ bos_init:
     ;--------------;
     ;  setup IDT   ;
     ;--------------;
-        mov    edi, u_isr                             ; isr.inc
+        mov    esi, u_isr                             ; isr.inc
         call   init_idt                               ; idt.inc
         mov    esi, idt_list                          ; idt.inc
         call   set_idt_list                           ; idt.inc

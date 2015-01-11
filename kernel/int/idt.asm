@@ -1,11 +1,25 @@
 ;----------------------------------------------------------;
-; BOS kernel                Christoffer Bubach, 2003-2005. ;
+; BOS kernel                Christoffer Bubach, 2003-2015. ;
 ;----------------------------------------------------------;
 ;                                                          ;
-;    set/modify IDT entries                                ;
+;   Set/modify IDT entries                                 ;
 ;                                                          ;
 ;----------------------------------------------------------;
 
+;-----------------------------------------------------;
+;                                                     ;
+; IDT entry structure                                 ;
+;                                                     ;
+;   16bit - entry offset bits 0..15                   ;
+;   16bit - code segment selector in GDT or LDT       ;
+;   8bit  - unused, set to 0                          ;
+;   8bit  - type and attributes                       ;
+;              -  0xE = 32bit intterrupt              ;
+;              -  0x8 = Present bit = 1               ;
+;   16bit - entry offset bits 16..31                  ;
+;                                                     ;
+;   middle section for code segment 08 = 0x8E000008   ;
+;-----------------------------------------------------;
 
 
 ;--------------------------------------------------;
@@ -15,24 +29,29 @@
 init_idt:
         push   eax
         push   ecx
+        push   edi
 
+        xor    edi, edi
         xor    ecx, ecx
-    .l1:
-        mov    eax, esi                               ; loop full IDT and
-        mov    [(0x6c00+ecx)], ax                     ; set to one ISR
-        add    ecx, 2
+        add    edi, [idtr.address]
+    .l1:                                              ; loop full IDT table
+        mov    eax, esi
+        mov    word [edi], ax                         ; set handler lower offset
+        add    edi, 2
 
-        mov    dword [(0x6c00+ecx)], 0x8E000008       ; 0x6c00 is where
-        add    ecx, 4                                 ; we put the IDT
+        mov    dword [edi], 0x8E000008                ; set IDT segment and attributes
+        add    edi, 4
 
         mov    eax, esi
         shr    eax, 16
-        mov    [(0x6c00+ecx)], ax
-        add    ecx, 2
+        mov    word [edi], ax                         ; set handler high offset
+        add    edi, 2
 
-        cmp    ecx, 0x800                             ; 256 ints
-        jb     .l1                                    ; * 8 bytes each
+        add    cx, 8                                  ; 8byte *
+        cmp    cx, word [idtr.size]                   ; 256 ints
+        jb     .l1                                    ; = done?
 
+        pop    edi
         pop    ecx
         pop    eax
         ret
@@ -45,30 +64,30 @@ init_idt:
 ;      edi = int function pointer      ;
 ;--------------------------------------;
 set_int:
-		push   eax
-		push   ecx
+        push   eax
+        push   ecx
 
-		mov    al, 8                                  ; 8 bytes for each int
-		mul    cl                                     ; cl * al = ax
-		movzx  ecx, ax                                ; ecx = IDT offset
-		shr    ecx, 1                                 ; 1/2 for dword list
-		mov    dword [(idt_list+ecx)], edi            ; add to dword int list
-		movzx  ecx, ax                                ; ecx = IDT offset
+        mov    al, 8                                  ; 8 bytes for each int
+        mul    cl                                     ; cl * al = ax
+        movzx  ecx, ax                                ; ecx = IDT offset
+        shr    ecx, 1                                 ; 1/2 for dword list
+        mov    dword [(idt_list+ecx)], edi            ; add to dword int list
+        movzx  ecx, ax                                ; ecx = IDT offset
 
-		mov    eax, edi
-		mov    [(0x6c00+ecx)], ax
-		add    ecx, 2
+        mov    eax, edi
+        mov    [(0x6c00+ecx)], ax
+        add    ecx, 2
 
-		mov    dword [(0x6c00+ecx)], 0x8E000008
-		add    ecx, 4
+        mov    dword [(0x6c00+ecx)], 0x8E000008
+        add    ecx, 4
 
-		mov    eax, edi
-		shr    eax, 16
-		mov    [(0x6c00+ecx)], ax
+        mov    eax, edi
+        shr    eax, 16
+        mov    [(0x6c00+ecx)], ax
 
-		pop    ecx
-		pop    eax
-		ret
+        pop    ecx
+        pop    eax
+        ret
 
 
 
@@ -78,15 +97,15 @@ set_int:
 ;      out: esi = address or 0 if none present   ;
 ;------------------------------------------------;
 get_int:
-		push   eax
+        push   eax
 
-		mov    eax, 4                                 ; 4 bytes for each address
-		mul    cl                                     ; cl * al = ax
-		mov    esi, idt_list
-		add    esi, eax
+        mov    eax, 4                                 ; 4 bytes for each address
+        mul    cl                                     ; cl * al = ax
+        mov    esi, idt_list
+        add    esi, eax
 
-		pop    eax
-		ret
+        pop    eax
+        ret
 
 
 
@@ -96,24 +115,24 @@ get_int:
 ;      in:  esi = pointer to int list    ;
 ;----------------------------------------;
 set_idt_list:
-		push   eax
-		push   edi
+        push   eax
+        push   edi
 
-		xor    ecx, ecx
-	.l1:
-		lodsd
-		or     eax, eax
-		jz     .next
-		mov    edi, eax
-		call   set_int
-	.next:
-		inc    ecx
-		cmp    ecx, 0x100
-		jb     .l1
+        xor    ecx, ecx
+    .l1:
+        lodsd
+        or     eax, eax
+        jz     .next
+        mov    edi, eax
+        call   set_int
+    .next:
+        inc    ecx
+        cmp    ecx, 0x100
+        jb     .l1
 
-		pop    edi
-		pop    eax
-		ret
+        pop    edi
+        pop    eax
+        ret
 
 
 
