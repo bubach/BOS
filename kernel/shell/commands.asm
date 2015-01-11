@@ -65,7 +65,7 @@
      ;-------------------;
      ;   show version    ;
      ;-------------------;
-	  bos_ver_str	  db   13,10,'BOS version 0.04 by Christoffer Bubach, 2003-2005.', 0
+	  bos_ver_str	  db   13,10,'BOS version 0.05 by Christoffer Bubach, 2003-2005.', 0
      show_ver:
 	  push	  esi
 	  push	  bx
