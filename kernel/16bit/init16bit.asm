@@ -15,7 +15,7 @@ init16bit:
 
         xor    eax, eax                               ; clear mem for IDT and GDT
         mov    edi, [idtr.address]                    ; IDT address
-        mov    ecx, ([idtr.size] + [idtr.size])/4
+        mov    ecx, (0x800 + 0x800)/4
         rep    stosd
 
         mov    eax, cs
@@ -29,7 +29,7 @@ init16bit:
         mov    [gdt.BOS_16data + 7], ah
 
         lea    esi, [gdt]
-        mov    edi, [gdtr.address]                    ; GDT address
+        mov    edi, 0x7400                            ; GDT address
         mov    ecx, (gdt_end - gdt)/4
         rep    movsd                                  ; Move it to final pos.
 

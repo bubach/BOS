@@ -311,7 +311,8 @@
 	  call	  print_char
 
 	  call	  fdd_reset
-	  call	  fdd_recalibrate		      ; do somthing about the error.. :P
+	  mov     al, 1
+	  call	  fdd_recal_seek		      ; do somthing about the error.. :P
 
      .end:
 	  ret
