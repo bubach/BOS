@@ -2,15 +2,10 @@
 ; BOS kernel                Christoffer Bubach, 2004-2005. ;
 ;----------------------------------------------------------;
 ;                                                          ;
-;  floppy disk driver originally by Craig Bamford, Dex4u.  ;
-;          adjustments and for BOS by bubach.              ;
+;  floppy disk driver.                                     ;
 ;                                                          ;
 ;----------------------------------------------------------;
 
-;  NOTE: I'm almost finished with a much improved version of
-;        this code, that supports 2 drives of multiple types.
-;        I'll wait with that until next version, so you won't
-;        have to see a half finished mess here.
 
 ;---------------------------;
 ;  variables and contants   ;

@@ -12,5 +12,5 @@
 ;  IDT pointer    ;
 ;-----------------;
 idtr:
-     .size	     dw   0x800
-     .address	     dd   0x6C00
+    .size        dw   0x800
+    .address     dd   0x6C00

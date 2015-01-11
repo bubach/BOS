@@ -10,12 +10,12 @@
 ;    save info        ;
 ;---------------------;
 init16bit:
-        call   getmem                  			      ; realmode/mem.inc
+        call   getmem                                 ; realmode/mem.inc
         mov    [ram_amount], eax
 
         xor    eax, eax                               ; clear mem for IDT and GDT
-        mov    edi, 0x6c00                            ; IDT address
-        mov    ecx, (0x800 + 0x800)/4
+        mov    edi, [idtr.address]                    ; IDT address
+        mov    ecx, ([idtr.size] + [idtr.size])/4
         rep    stosd
 
         mov    eax, cs
@@ -29,7 +29,7 @@ init16bit:
         mov    [gdt.BOS_16data + 7], ah
 
         lea    esi, [gdt]
-        mov    edi, 0x7400                            ; GDT address
+        mov    edi, [gdtr.address]                    ; GDT address
         mov    ecx, (gdt_end - gdt)/4
         rep    movsd                                  ; Move it to final pos.
 
