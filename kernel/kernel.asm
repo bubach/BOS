@@ -101,7 +101,7 @@ flush:
     include  'vars/strings.asm'                       ; All strings in english (soon).
     include  'init/bios.asm'                          ; Get back to realmode and do an INT.
     include  'init/pic.asm'                           ; PIC rutines.
-    include  'system/sys_ints.asm'                    ; System specific interrupts.
+    include  'system/services.asm'                    ; System service handler (int 0x32).
     include  'kbd/keyboard.asm'                       ; Keyboard ISR.
     include  'kbd/keymap.asm'                         ; Keymap(s).
     include  'shell/shell.asm'                        ; File with shell/kernel monitor functions.

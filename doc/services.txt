@@ -1,0 +1,160 @@
+SYSTEM SERVICES LAYOUT
+======================
+
+All  OS functionality  can be reached from one  or  several
+interfaces/services.
+
+When calling the  system interrupt  0x32,  you request a service
+number and function in AX register with AL & AH. Making 256 the max
+number of interfaces and available service-functions.
+
+Services numbered 0x0F and below are system reserved and will not be
+assigned automatically when requesting to add a new service. They can
+still be replaced by implicitly requesting that service number instead
+of getting a free one assigned.
+
+This will allow for great OS modularity when each interface/service-
+group can be replaced or upgraded by any user software or driver.
+
+Most service groups or interfaces can be extended with drivers for
+the type of device(s) that it handles, or the full service/interface
+can be replaced for more fundamental changes to the design. For
+example the 'process' and 'memory' interfaces can be replaced to
+allow more advanced functionality like multitasking and paging.
+
+The OS will be unable to function at all without the basic service
+0x00 that performs the most crucial tasks, and without the STDIO and
+VFS interfaces it will be severly crippled, left with no means of
+communication, except perhaps a beep or two from the PC-speaker.
+
+Below is a more visual representation of the main OS services
+that will likely be included in the kernel. And a draft of what
+functions each could or would include.  Some functions also have
+a breif example of parameters required.
+
+Possible funture service groups or interfaces that could be system
+default include: 
+- network functionality
+- general PCI devices
+- special one for all things USB?
+- GUI specific functions
+- running stuff in 16 and 64 bit, with extra DOS emulation
+  and/or other services
+
+
+
+
+services.asm  (main service 0x00)
+--------------------------------------
+  always present in BOS, kernel 
+--------------------------------------
+   - add service
+        signature       dd  'VFS ', 'IO  ', 'SND ', 'PCI '
+        version         db  1
+        requested_no    db  23    ; 0xFF or 0x00 to get assigned
+        service_struct  dd  0     ; memory address of service calltable
+   - get servide
+        AL = number
+        returns all info above if service found
+   - remove service
+        AL = number
+        removes / unloads a service/interface
+   - get free number
+        AL = free service number  ; always above 0x0F (below reserved)
+   - get BOS version (and other misc. kernel functions below)
+   - get/set interrupts
+   - execute kernel monitor command/script
+   - get time/date
+   - DMA functions, here or in VFS/floppy/memory drivers?
+   - GDT function, create new segments 'n shit
+   - pc-speaker beep if not even stdio is found
+   - CMOS / PIC functions
+   - run 16/64 bit code - seperate services for this? (int21h included?)
+   - get specified...
+
+
+stdio.asm (service number 0x01)
+--------------------------------------
+  needs to init itself as a service,
+  requesting servicenumber 1.
+  internal struct with info on
+  default in and out devices.
+--------------------------------------
+   - add device
+        type            db  1        ; 0 = output, 1 = input
+        signature       dd  'COM ', 'VGA ', 'VESA', 'FILE', 'NET ', 'USB ', 'KEYB', 'MICE'
+        version         db  1
+        device_struct   dd  0     ; address of calltable
+   - get device
+        AL = assigned device type ID / 0 for default?
+        returns all info above
+   - remove device
+        AL = assigned device type ID
+        removes device
+   - set default
+        AL = assigned device type ID
+        AH = 1 for in, 0 for out
+   - getc
+        get a char from stdin or specified device
+   - putc
+        put a char to stdout or specified device
+
+   .... other default stubs needed for STDIO ....
+
+
+vfs.asm (service number 0x02)
+--------------------------------------
+  needs to init itself as a service,
+  requesting servicenumber 2.
+  internal struct with info on
+  devices and filesystems.
+  add simple 'FILE' STDIO interface?
+--------------------------------------
+   - add device
+   - remove device
+   - get devices (list or number specified)
+   - read sector
+   - write sector
+   - seek
+   - more device specific stubs?
+   ...
+   - add fs
+   - remove fs
+   - parse path
+   - load file
+   - write file
+   - seek file
+   - close file
+   - mount device (with auto detect fs option)
+   - format fs (take device argument)
+   - more fs specific stubs?
+
+
+proccess.asm (service number 0x03)
+--------------------------------------
+  needs to init itself as a service,
+  requesting servicenumber 3.
+  possible to extend/replace for
+  multitasking.
+--------------------------------------
+   - Load process
+       needs VFS info to load file
+   - Exit process
+   - Terminate and Stay Resident
+   - Add exec. driver
+       interface to load driver/extensions for
+       more executable formats, possibly other
+       execution modes: realmode, longmode
+   - Remove driver
+
+
+memory.asm (service number 0x04)
+--------------------------------------
+  needs to init itself as a service,
+  requesting servicenumber 4.
+--------------------------------------
+   - lowalloc ? (for low mem, DMA & 16bit code)
+   - alloc
+   - realloc
+   - free
+   - DMA functions here? Possibly most related to mem?
