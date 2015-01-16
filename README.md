@@ -1,6 +1,6 @@
 BOS
 ===
 
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/bubach/BOS?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Gitter](https://img.shields.io/badge/Gitter-Join%20chat-brightgreen.svg)](https://gitter.im/bubach/BOS) [![GitHub Pages](https://img.shields.io/badge/GitHub-Pages-brightgreen.svg)](http://bubach.github.io/BOS/)
 
 BOS - a small x86 operating system written in Assembly
