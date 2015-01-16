@@ -7,7 +7,7 @@
 ;----------------------------------------------------------;
 
     ;---------------------------------------------;
-    ;   main FAT12 info structure                 ;
+    ;   FAT12 main info structure                 ;
     ;---------------------------------------------;
     struc fat12
     {
@@ -21,8 +21,13 @@
         .boot                            bootsector  
         .dir_entries:
             times 16 * sizeof.dir_entry  db 0        ; 512b dir entry buffer
-        .fat_buffer:      times 512      db 0        ; 512b FAT cluster info buffer           
+        .fat_buffer:      times 512      db 0        ; 512b FAT cluster info buffer
     }
+
+    virtual at 0                                      ; could use "at esi" instead
+        fat12 fat12
+        sizeof.fat12 = $-$$     
+    end virtual
 
     ;---------------------------------------------;
     ;   FAT12 bootsector structure                ;
@@ -53,10 +58,15 @@
         .boot_signature    db  0,0                    ; 0x55,0xAA
     }
 
+    virtual at 0
+        bootsector bootsector
+        sizeof.bootsector = $-$$
+    end virtual
+
     ;---------------------------------------------;
     ;   FAT12 directory entry structure           ;
     ;---------------------------------------------;
-    struct dir_entry
+    struc dir_entry
     {
         .filename          db  0,0,0,0,0,0,0,0
         .extension         db  0,0,0
@@ -68,10 +78,15 @@
         .filesize          dd  0
     }
 
+    virtual at 0
+        dir_entry dir_entry
+        sizeof.dir_entry = $-$$
+    end virtual
+
     ;---------------------------------------------;
     ;   FAT12 directory entry for LFN             ;
     ;---------------------------------------------;
-    struct lnf_entry
+    struc lfn_entry
     {
         .order             db  0                      ; LFN entry in sequence, never 0x00 or 0xE5.
         .namefirst         dw  0,0,0,0,0              ; 5 first unicode (2byte) chars
@@ -85,22 +100,7 @@
 
     virtual at 0
         lfn_entry lfn_entry
-        sizeof.lfn_entry = $
-    end virtual
-
-    virtual at 0
-        dir_entry dir_entry
-        sizeof.dir_entry = $
-    end virtual
-
-    virtual at 0
-        bootsector bootsector
-        sizeof.bootsector = $
-    end virtual
-
-    virtual at 0
-        disk disk 
-        sizeof.disk = $     
+        sizeof.lfn_entry = $-$$
     end virtual
 
     ;------------------------------------------;
@@ -138,7 +138,7 @@
 
 
 
-fd0: fat12            ; define fd0 data..  tmp example.
+fd0 fat12            ; define fd0 data..  tmp example.
 
 ; TODO, alloc memory for struct and keep pointer only.
 ; ---------------
@@ -191,7 +191,10 @@ calc_lfn_chksum:
         mov    cx, 11
         xor    ax, ax                                 ; return value start with null
     .l1:
-        add    ax, byte [esi]                         ; add next char to sum
+        push   cx
+        movzx  cx, byte [esi]                         ; add next char to sum
+        add    ax, cx
+        pop    cx
         shr    ax, 1                                  ; shift sum right by 1
         inc    esi                                    ; prepare for next character
         loop   .l1

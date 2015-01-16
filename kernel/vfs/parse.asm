@@ -29,19 +29,19 @@ parse_path:
           mov     bl, 0x00                            ; fd base is 0x00
           cmp     word [esi], 'FD'                    ; fd check
           je      .drive_found
-          mov     bl, 0x0F                            ; hd base is 0x0F
+          mov     bl, 0x10                            ; hd base is 0x10
           cmp     word [esi], 'HD'                    ; hd check
           je      .drive_found
-          mov     bl, 0x5F                            ; cd base is 0x5F
+          mov     bl, 0x60                            ; cd base is 0x60
           cmp     word [esi], 'CD'                    ; cd check
           je      .drive_found
-          mov     bl, 0x7F                            ; rd base is 0x7F
-          cmp     word [esi], 'RD'                    ; rd (ram drive) check
+          mov     bl, 0x80                            ; vd base is 0x80
+          cmp     word [esi], 'VD'                    ; vd (virtual ram drive) check
           je      .drive_found
-          mov     bl, 0x8F                            ; rm base is 0x8F
-          cmp     word [esi], 'RM'                    ; rm (removable/usb)
+          mov     bl, 0x90                            ; rd base is 0x90
+          cmp     word [esi], 'RD'                    ; rd (removable/usb)
           je      .drive_found
-          mov     bl, 0xAF                            ; nd base is 0xAF
+          mov     bl, 0xB0                            ; nd base is 0xB0
           cmp     word [esi], 'ND'                    ; nd (net) check
           je      .drive_found
 

@@ -38,6 +38,7 @@ default include:
 - general PCI devices
 - special one for all things USB?
 - GUI specific functions
+- printing services
 - running stuff in 16 and 64 bit, with extra DOS emulation
   and/or other services
 
@@ -65,12 +66,9 @@ services.asm  (main service 0x00)
    - get/set interrupts
    - execute kernel monitor command/script
    - get time/date
-   - DMA functions, here or in VFS/floppy/memory drivers?
    - GDT function, create new segments 'n shit
    - pc-speaker beep if not even stdio is found
    - CMOS / PIC functions
-   - run 16/64 bit code - seperate services for this? (int21h included?)
-   - get specified...
 
 
 stdio.asm (service number 0x01)
@@ -146,6 +144,7 @@ proccess.asm (service number 0x03)
        more executable formats, possibly other
        execution modes: realmode, longmode
    - Remove driver
+   - run 16/64 bit code - seperate services for this? (int21h included?)
 
 
 memory.asm (service number 0x04)
