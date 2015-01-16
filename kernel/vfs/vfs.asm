@@ -69,7 +69,7 @@
     end virtual
 
 
-VFS_structure VFS
+    VFS_structure             dd 0
 
 ;--------------------------------------------------------------;
 ;   init_vfs  -  detect connected drives                       ;
@@ -82,6 +82,48 @@ VFS_structure VFS
 ;--------------------------------------------------------------;
 init_vfs:
         push   eax
-        ; a bit more code here 
+        push   ebx
+
+        mov    ebx, sizeof.VFS                        ; allocate structure size
+        call   allocate_mem
+        cmp    eax, 0
+        jne    .ok
+        stc                                           ; if error, set carry
+        mov    ebx, 0
+
+    .ok:
+        mov    dword [VFS_structure], ebx
+
+        pop    ebx
+        pop    eax
+        ret
+
+;--------------------------------------------------------------;
+;   add_media  -  add media driver                             ;
+;--------------------------------------------------------------;
+;                                                              ;
+;       in:  reg = pointer to VFS drive info                   ;
+;                                                              ;
+;       out: reg = pointer to struct(s) if FAT12 found         ;
+;                                                              ;
+;--------------------------------------------------------------;
+add_media:
+        push   eax
+        ;...
+        pop    eax
+        ret
+
+;--------------------------------------------------------------;
+;   add_fs  -  add filesystem driver                           ;
+;--------------------------------------------------------------;
+;                                                              ;
+;       in:  reg = pointer to VFS drive info                   ;
+;                                                              ;
+;       out: reg = pointer to struct(s) if FAT12 found         ;
+;                                                              ;
+;--------------------------------------------------------------;
+add_fs:
+        push   eax
+        ;...
         pop    eax
         ret
