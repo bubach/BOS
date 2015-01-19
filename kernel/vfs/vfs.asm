@@ -7,6 +7,12 @@
 ;----------------------------------------------------------;
 
 
+    ; file handles need to be dword, where the high
+    ; word contains drive number, and the low word
+    ; is the drive/FS specific handle. limits FS to
+    ; a max of 65535 opened files. should be alright. ;)
+
+
     ;---------------------------------------------;
     ;   VFS main structure                        ;
     ;---------------------------------------------;
@@ -17,6 +23,8 @@
             times 255 * sizeof.VFS_storage     db 0   ; storage driver structure
         .filesystem:          
             times 255 * sizeof.VFS_filesystem  db 0   ; filesystem driver structure
+        .mounted                               db 0   ; 1/0 switch if mounted
+        .current_path:          times 255      db 0   ; drive opened path (increase max path size?)
     }
 
     virtual at 0                                      ; could use "at esi" instead

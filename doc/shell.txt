@@ -1,0 +1,26 @@
+SHELL DESIGN
+============
+
+The BOS shell should operate at a minimum resolution of 80*25, but prefarably on more.
+It should be tile-able to allow different apps to run in different parts of the window, such
+as a "graphical" file browser might use up all but one line at the bottom for commands.
+
+The mouse or keyboard interrupts will be used to switch between active tile, giving that
+areas program full control. Simulating multitasking to some degree.
+
+The built in scripting language needs support to set up screen resolution, tile areas,
+and more on boot.
+
+Programs should provide minimum resolution requirements if not text based scrolling
+is all it needs.
+
+Pop-ups with kernel panics or dialogs could cover any area.
+
+The shell scripting language will allow a few special case script-files called in an
+event like fashion.  If .RUN is the default script exstension, AUTO.RUN would be used
+at boot. EXIT.RUN when exiting/rebooting, NOTFOUND.RUN to parse commands not understood
+and provide shortcuts for builtin commands. Cron like functionality for other
+scripts to be scheduled.
+
+GUI apps using build in functions for borders, pop-ups and such will scale perfectly
+from 80*25 textmode all the way to some VESA mode with polished graphics, like 1024*768.

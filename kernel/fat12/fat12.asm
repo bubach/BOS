@@ -11,17 +11,19 @@
     ;---------------------------------------------;
     struc fat12
     {
-        .disk_number                     db  0       ; which VFS disk number
-        .root_dir                        dw  0       ; position of rootdir
-        .fat_1                           dd  0       ; position of fat1
-        .fat_2                           dd  0       ; position of fat2
-        .data_area                       dw  0       ; position of dataarea
-        .disk_size                       dd  0       ; total storage size
-        .free_space                      dd  0       ; free space available
-        .boot                            bootsector  
+        .disk_number                     db  0        ; which VFS disk number
+        .root_dir                        dw  0        ; position of rootdir
+        .fat_1                           dd  0        ; position of fat1
+        .fat_2                           dd  0        ; position of fat2
+        .data_area                       dw  0        ; position of dataarea
+        .disk_size                       dd  0        ; total storage size
+        .free_space                      dd  0        ; free space available
+        .boot: times sizeof.bootsector   db  0        ; copy of FAT12 bootsector
         .dir_entries:
-            times 16 * sizeof.dir_entry  db 0        ; 512b dir entry buffer
-        .fat_buffer:      times 512      db 0        ; 512b FAT cluster info buffer
+            times 16 * sizeof.dir_entry  db  0        ; 512b dir entry buffer
+        .fat_buffer:      times 512      db  0        ; 512b FAT cluster info buffer
+        .filehandles:
+            times 32 * sizeof.filehandle db  0        ; for now, max opened files is 32
     }
 
     virtual at 0                                      ; could use "at esi" instead
@@ -103,6 +105,29 @@
         sizeof.lfn_entry = $-$$
     end virtual
 
+    ;---------------------------------------------;
+    ;   FAT12 file-handle structure               ;
+    ;---------------------------------------------;
+    struc filehandle
+    {
+        .handles           db  0                      ; reference count or or zero for unused
+        .mode              db  0                      ; open mode. 0=read, 1=write, 2=r/w.
+        .lfn_entry         dw  0                      ; file LFN directory entry position
+        .direntry          dw  0                      ; file directory entry position
+        .cluster           dw  0                      ; file first cluster
+        .attribute         db  0                      ; file attributes
+        .filetime          dw  0                      ; last modified time
+        .filedate          dw  0                      ; last modified date
+        .filesize          dd  0                      ; filesize
+        .position          dd  0                      ; R/W position in file
+        .clusterpos        dw  0                      ; cluster number of last cluster read
+    }
+
+    virtual at 0
+        filehandle filehandle
+        sizeof.filehandle = $-$$
+    end virtual
+
     ;------------------------------------------;
     ;   FAT cluster constants used             ;
     ;------------------------------------------;
@@ -144,6 +169,26 @@ fd0 fat12            ; define fd0 data..  tmp example.
 ; ---------------
 ;drive dd 0
 ;mov edi, drive+fat12into.boot
+
+;--------------------------------------
+; possible interface to copy/follow,
+; add getFilename/path function?
+;--------------------------------------
+;    INT 21,3C  Create file using handle
+;    INT 21,3D  Open file using handle
+;    INT 21,3E  Close file using handle
+;    INT 21,3F  Read file or device using handle
+;    INT 21,40  Write file or device using handle
+;    INT 21,41  Delete file
+;    INT 21,42  Move file pointer using handle
+;    INT 21,43  Change file mode
+;    INT 21,45  Duplicate file handle
+;    INT 21,46  Force duplicate file handle
+;    INT 21,56  Rename file
+;    INT 21,57  Get/set file date and time using handle
+;    INT 21,5A  Create temporary file (3.x+)
+;    INT 21,5B  Create new file (3.x+)
+;    INT 21,67  Set handle count (DOS 3.3+)
 
 ;--------------------------------------------------------------;
 ;   init_fat12  -  detect if drive fs is fat12 and init        ;
