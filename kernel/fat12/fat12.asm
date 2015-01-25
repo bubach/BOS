@@ -7,28 +7,54 @@
 ;----------------------------------------------------------;
 
     ;---------------------------------------------;
+    ;   FAT12 calltable and structure pointer     ;
+    ;---------------------------------------------;
+    FAT12:
+        .data_pointer         dd  0                   ; internal driver data
+        .FSname               db  'FAT12'             ; 5 char filesystem name
+        .init                 dd  init_fat12          ; pointer to init
+        .deinit               dd  0                   ; remove driver
+        .format               dd  0                   ; format drive
+        .mount                dd  0                   ; mount drive
+        .unmount              dd  0                   ; unmount drive
+        .find                 dd  0                   ; find file
+        .findnext             dd  0                   ; get next match
+        .open                 dd  0                   ; open file, get handle
+        .close                dd  0                   ; close file from handle
+        .attrib               dd  0                   ; get/set attrib. and time
+        .read                 dd  0                   ; read file from handle
+        .write                dd  0                   ; write file from handle
+        .seek                 dd  0                   ; seek from handle
+        .rename               dd  0                   ; rename file
+        .remove               dd  0                   ; remove file/dir
+        .create               dd  0                   ; create file/dir
+        .ioctl                dd  0                   ; extra calls if exists
+
+    ;---------------------------------------------;
     ;   FAT12 main info structure                 ;
     ;---------------------------------------------;
-    struc fat12
+    struc fat12_data
     {
         .disk_number                     db  0        ; which VFS disk number
         .root_dir                        dw  0        ; position of rootdir
+        .disk_size                       dd  0        ; total storage size
+        .free_space                      dd  0        ; free space available
         .fat_1                           dd  0        ; position of fat1
         .fat_2                           dd  0        ; position of fat2
         .data_area                       dw  0        ; position of dataarea
-        .disk_size                       dd  0        ; total storage size
-        .free_space                      dd  0        ; free space available
         .boot: times sizeof.bootsector   db  0        ; copy of FAT12 bootsector
         .dir_entries:
             times 16 * sizeof.dir_entry  db  0        ; 512b dir entry buffer
         .fat_buffer:      times 512      db  0        ; 512b FAT cluster info buffer
-        .filehandles:
+        .foundfile:
+            times 1 * sizeof.search      db  0        ; "DTA" like structure
+        .filehandles:                                 ; "System File Table"
             times 32 * sizeof.filehandle db  0        ; for now, max opened files is 32
     }
 
     virtual at 0                                      ; could use "at esi" instead
-        fat12 fat12
-        sizeof.fat12 = $-$$     
+        fat12_data fat12_data
+        sizeof.fat12_data = $-$$     
     end virtual
 
     ;---------------------------------------------;
@@ -106,6 +132,27 @@
     end virtual
 
     ;---------------------------------------------;
+    ;   FAT12 file search/DTA structure           ;
+    ;---------------------------------------------;
+    struc search
+    {
+        .searchname:
+            times 255      db  0                      ; file search pattern.
+        .attribute         db  0                      ; search attribute.
+        .direntry          dw  0                      ; directory entry number, 0 based
+        .dircluster        dw  0                      ; starting cluster of dir, 0 root
+        .foundattrib       db  0                      ; attribute of matching file
+        .foundtime         dw  0                      ; file time
+        .founddate         dw  0                      ; file date
+        .foundsize         dw  0                      ; file size
+    }
+
+    virtual at 0
+        search search
+        sizeof.search = $-$$
+    end virtual
+
+    ;---------------------------------------------;
     ;   FAT12 file-handle structure               ;
     ;---------------------------------------------;
     struc filehandle
@@ -121,6 +168,10 @@
         .filesize          dd  0                      ; filesize
         .position          dd  0                      ; R/W position in file
         .clusterpos        dw  0                      ; cluster number of last cluster read
+        .shortname:
+            times 11       db  0                      ; short name
+        .fullname:
+            times 255      db  0                      ; the full LFN
     }
 
     virtual at 0
@@ -159,36 +210,6 @@
     lfn_last_entry_mask = 0x40                         ; LFN sequence-order mask for last
     attribute_lfn       = 0x0F                         ; attrb. byte value for LFN dir entry
 
-
-
-
-
-fd0 fat12            ; define fd0 data..  tmp example.
-
-; TODO, alloc memory for struct and keep pointer only.
-; ---------------
-;drive dd 0
-;mov edi, drive+fat12into.boot
-
-;--------------------------------------
-; possible interface to copy/follow,
-; add getFilename/path function?
-;--------------------------------------
-;    INT 21,3C  Create file using handle
-;    INT 21,3D  Open file using handle
-;    INT 21,3E  Close file using handle
-;    INT 21,3F  Read file or device using handle
-;    INT 21,40  Write file or device using handle
-;    INT 21,41  Delete file
-;    INT 21,42  Move file pointer using handle
-;    INT 21,43  Change file mode
-;    INT 21,45  Duplicate file handle
-;    INT 21,46  Force duplicate file handle
-;    INT 21,56  Rename file
-;    INT 21,57  Get/set file date and time using handle
-;    INT 21,5A  Create temporary file (3.x+)
-;    INT 21,5B  Create new file (3.x+)
-;    INT 21,67  Set handle count (DOS 3.3+)
 
 ;--------------------------------------------------------------;
 ;   init_fat12  -  detect if drive fs is fat12 and init        ;

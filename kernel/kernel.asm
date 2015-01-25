@@ -4,8 +4,8 @@
 ;    BOS 32-bit kernel, expects to be loaded at 32kb    ;
 ;    in mem.   Small amount of 16-bit code included.    ;
 ;                                                       ;
-;      For any comments on this code, mail me.          ;
-;   http://bos.asmhackers.net/   asmhacker@gmail.com    ;
+;    Homepage:   http://bos.asmhackers.net/             ;
+;    Repository: http://github.com/bubach/BOS           ;
 ;                                                       ;
 ;         by: Christoffer Bubach, 2003-2015             ;
 ;-------------------------------------------------------;

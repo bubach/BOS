@@ -10,7 +10,7 @@
 ;   variables    ;
 ;----------------;
 	  dbg_head	  db   'ษออออออออออออออออออออออออออออออออออป',0
-	  dbg_head2	  db   'บ BOS 0.04 - ERROR: ',0
+	  dbg_head2	  db   'บ BOS 0.05 - ERROR: ',0
 	  dbg_head3	  db   'บ                                  บ',0
 	  dbg_press	  db   'บ  Press any key to continue...    บ',0
 	  dbg_restart	  db   'บ Press a key to restart the PC... บ',0

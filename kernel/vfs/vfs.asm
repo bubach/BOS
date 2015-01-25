@@ -7,12 +7,6 @@
 ;----------------------------------------------------------;
 
 
-    ; file handles need to be dword, where the high
-    ; word contains drive number, and the low word
-    ; is the drive/FS specific handle. limits FS to
-    ; a max of 65535 opened files. should be alright. ;)
-
-
     ;---------------------------------------------;
     ;   VFS main structure                        ;
     ;---------------------------------------------;
@@ -56,6 +50,7 @@
     struc VFS_filesystem
     {
         .data_pointer         dd  0                   ; internal driver data
+        .FSname               db  0,0,0,0,0           ; 5 char filesystem name
         .init                 dd  0                   ; pointer to init
         .deinit               dd  0                   ; remove driver
         .format               dd  0                   ; format drive
@@ -64,9 +59,12 @@
         .find                 dd  0                   ; find file
         .findnext             dd  0                   ; get next match
         .open                 dd  0                   ; open file, get handle
+        .close                dd  0                   ; close file from handle
+        .attrib               dd  0                   ; get/set attrib. and time
         .read                 dd  0                   ; read file from handle
         .write                dd  0                   ; write file from handle
         .seek                 dd  0                   ; seek from handle
+        .rename               dd  0                   ; rename file
         .remove               dd  0                   ; remove file/dir
         .create               dd  0                   ; create file/dir
         .ioctl                dd  0                   ; extra calls if exists
@@ -135,5 +133,26 @@ add_media:
 add_fs:
         push   eax
         ;...
+        pop    eax
+        ret
+
+;--------------------------------------------------------------;
+;   open_file  -  open file, return handle                     ;
+;--------------------------------------------------------------;
+;                                                              ;
+;       in:  reg = ASCIIZ file name and such                   ;
+;                                                              ;
+;       out: reg = dword file handle                           ;
+;                                                              ;
+;--------------------------------------------------------------;
+open_file:
+        push   eax
+        ; file handles need to be dword, where the high
+        ; word contains drive number, and the low word
+        ; is the drive/FS specific handle.  meaning no internal
+        ; table in VFS, created dynamically with FS info.
+        ; limits FS to a max of 65535 opened files. most use fewer
+        ; as default. FAT12 driver has 32.
+        ; FS reports error if handle is invalid.
         pop    eax
         ret
