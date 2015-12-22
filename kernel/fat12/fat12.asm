@@ -54,7 +54,7 @@
 
     virtual at 0                                      ; could use "at esi" instead
         fat12_data fat12_data
-        sizeof.fat12_data = $-$$     
+        sizeof.fat12_data = $-$$
     end virtual
 
     ;---------------------------------------------;
@@ -65,7 +65,7 @@
         .jumper            db  0,0,0
         .oem               db  0,0,0,0,0,0,0,0
         .sectorsize        dw  0
-        .sect_per_clust    db  0  
+        .sect_per_clust    db  0
         .reserved_sect     dw  0                      ; reserved sectors, 1 for bootsector.
         .fats_per_drive    db  0
         .root_entries      dw  0
@@ -82,7 +82,7 @@
         .disk_id           dd  0                      ; random ident number on format.
         .volume_label      db  0,0,0,0,0,0,0,0,0,0,0
         .filesystem        db  0,0,0,0,0,0,0,0        ; "FAT12   " or "FAT16   "
-        .code:   times 448 db  0 
+        .code:   times 448 db  0
         .boot_signature    db  0,0                    ; 0x55,0xAA
     }
 
@@ -224,20 +224,20 @@ init_fat12:
         push   eax
         ;...
 
-     ;-----------------------------; 
-     ;   calculate root location   ; 
-     ;-----------------------------; 
-        xor    eax, eax 
-        mov    al, byte [fd0.boot.fats_per_drive] 
-        mul    word [fd0.boot.sectors_per_fat] 
-        add    ax, word [fd0.boot.reserved_sect] 
-        mov    [fd0.root_dir], ax  
+     ;-----------------------------;
+     ;   calculate root location   ;
+     ;-----------------------------;
+        xor    eax, eax
+        mov    al, byte [fd0.boot.fats_per_drive]
+        mul    word [fd0.boot.sectors_per_fat]
+        add    ax, word [fd0.boot.reserved_sect]
+        mov    [fd0.root_dir], ax
 
-;   working with 
-;mov  si, [drive] 
-;mov  ax, [si+fat12.boot.sectorssize] 
+;   working with
+;mov  si, [drive]
+;mov  ax, [si+fat12.boot.sectorssize]
 
-        ; a bit more code here 
+        ; a bit more code here
         pop    eax
         ret
 
@@ -265,7 +265,7 @@ calc_lfn_chksum:
         inc    esi                                    ; prepare for next character
         loop   .l1
 
-        pop    esi    
+        pop    esi
         pop    cx
         ret
 

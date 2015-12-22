@@ -29,65 +29,65 @@
 ;  out: nothing.                    ;
 ;-----------------------------------;
 dma_transfer:
-	  push	  eax
-	  push	  edx
-	  push	  esi
-	  cli
-	  or	  bh, bh
-	  jz	  .dont_read
+        push   eax
+        push   edx
+        push   esi
+        cli
+        or     bh, bh
+        jz     .dont_read
 
-	  mov	  bh, bl
-	  add	  bh, 0x48
-	  jmp	  .read
-     .dont_read:
-	  mov	  bh, bl
-	  add	  bh, 0x44
-     .read:
-	  dec	  esi
+        mov    bh, bl
+        add    bh, 0x48
+        jmp    .read
+    .dont_read:
+        mov    bh, bl
+        add    bh, 0x44
+    .read:
+        dec    esi
 
-	  movzx   eax, bl
-	  mov	  dx, word [(eax*2)+dma_mask_reg]
-	  mov	  al, bl
-	  or	  al, 0x04
-	  out	  dx, al			      ; disable the channel
+        movzx  eax, bl
+        mov    dx, word [(eax*2)+dma_mask_reg]
+        mov    al, bl
+        or     al, 0x04
+        out    dx, al                                 ; disable the channel
 
-	  movzx   eax, bl
-	  mov	  dx, word [(eax*2)+dma_clear_reg]
-	  mov	  al, 0
-	  out	  dx, al			      ; initialize flip-flop
+        movzx  eax, bl
+        mov    dx, word [(eax*2)+dma_clear_reg]
+        mov    al, 0
+        out    dx, al                                 ; initialize flip-flop
 
-	  movzx   eax, bl
-	  mov	  dx, word [(eax*2)+dma_mode_reg]
-	  mov	  al, bh
-	  out	  dx, al			      ; set DMA mode
+        movzx  eax, bl
+        mov    dx, word [(eax*2)+dma_mode_reg]
+        mov    al, bh
+        out    dx, al                                 ; set DMA mode
 
-	  movzx   eax, bl
-	  mov	  dx, word [(eax*2)+dma_addr_port]
-	  mov	  al, cl
-	  out	  dx, al			      ; write low offset part
-	  mov	  al, ch
-	  out	  dx, al			      ; and high offset part
+        movzx  eax, bl
+        mov    dx, word [(eax*2)+dma_addr_port]
+        mov    al, cl
+        out    dx, al                                 ; write low offset part
+        mov    al, ch
+        out    dx, al                                 ; and high offset part
 
-	  movzx   eax, bl
-	  mov	  dx, word [(eax*2)+dma_page_port]
-	  mov	  eax, ecx
-	  shr	  eax, 16
-	  out	  dx, al			      ; write page.
+        movzx  eax, bl
+        mov    dx, word [(eax*2)+dma_page_port]
+        mov    eax, ecx
+        shr    eax, 16
+        out    dx, al                                 ; write page.
 
-	  movzx   eax, bl
-	  mov	  dx, word [(eax*2)+dma_count_port]
-	  mov	  eax, esi
-	  out	  dx, al			      ; low count
-	  mov	  al, ah
-	  out	  dx, al			      ; high count
+        movzx  eax, bl
+        mov    dx, word [(eax*2)+dma_count_port]
+        mov    eax, esi
+        out    dx, al                                 ; low count
+        mov    al, ah
+        out    dx, al                                 ; high count
 
-	  movzx   eax, bl
-	  mov	  dx, word [(eax*2)+dma_mask_reg]
-	  mov	  al, bl
-	  out	  dx, al			      ; enable channel
+        movzx  eax, bl
+        mov    dx, word [(eax*2)+dma_mask_reg]
+        mov    al, bl
+        out    dx, al                                 ; enable channel
 
-	  sti
-	  pop	  esi
-	  pop	  edx
-	  pop	  eax
-	  ret
+        sti
+        pop    esi
+        pop    edx
+        pop    eax
+        ret

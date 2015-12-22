@@ -10,7 +10,7 @@
 ;  needed to get back to 16-bit mode    ;
 ;---------------------------------------;
     realmode_cs     dw   0
-    ridtr:	     dw   0x3FF
+    ridtr:          dw   0x3FF
                     dd   0
 
 ;----------------;

@@ -263,7 +263,7 @@ found:
 ;  the file is loaded   ;
 ;-----------------------;
 quit:
-        jmp    0x0000:0x8000               ; jump to loaded file (64kb in mem)
+        jmp    0x0000:0x8000                          ; jump to loaded file (64kb in mem)
 
 
 ;-------------------------------------;

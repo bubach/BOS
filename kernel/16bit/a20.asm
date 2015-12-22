@@ -42,10 +42,10 @@ enable_a20:
 ;  test if A20 is set     ;
 ;------------------------;
 a20_test:
-        mov      al, byte [fs:0]
-        mov      ah, al
-        not      al
-        xchg      al, byte [gs:0x10]
-        cmp      ah, byte [fs:0]
-        mov      [gs:0x10], al
+        mov    al, byte [fs:0]
+        mov    ah, al
+        not    al
+        xchg   al, byte [gs:0x10]
+        cmp    ah, byte [fs:0]
+        mov    [gs:0x10], al
         ret
