@@ -12,7 +12,7 @@
 ;--------------;
 
     prompt                  db   'BOS kernel>', 0
-    cmd_buffer: times 255	db   0                    ; 255 char command buffer
+    cmd_buffer: times 255   db   0                    ; 255 char command buffer
 
 
 
@@ -39,7 +39,7 @@ shell:
         mov    cx, 0                                  ; max 254 chars in command
     .loop:                                            ; no. 255 is always a 0
 
-        push   cx                                     ; better be sure it´s safe..
+        push   cx                                     ; better be sure itÂ´s safe..
         push   edi
 
         call   getc                                   ; keyboard.inc
@@ -74,7 +74,7 @@ shell:
         jmp    chk_cmd
 
      .backspace:
-        cmp    cx, 0                                  ; can´t delete the prompt.. ;-)
+        cmp    cx, 0                                  ; canÂ´t delete the prompt.. ;-)
         je     .loop
         dec    edi                                    ; "remove" one char from buffer
         call   backspace                              ; do backspace on screen
@@ -154,7 +154,7 @@ chk_cmd:
     ;   done. command found    ;
     ;--------------------------;
     .done:
-        cmp    ecx, 0                                 ; make sure it´s more
+        cmp    ecx, 0                                 ; make sure itÂ´s more
         je     .d_quit                                ; then 0 chars..
 
         shl    ebp, 2
